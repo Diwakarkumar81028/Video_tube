@@ -1,5 +1,5 @@
 import express from "express"
-import CookieParser from "cookieparser";
+import cookieParser from "cookie-parser"
 import cors from "cors"
 
 const app = express()
@@ -15,5 +15,10 @@ app.use(express.urlencoded({extended:true,limit:"16kb"}))
 //img+pdf--> store in public folder
 app.use(express.static("public"));
 //cookies
-app.use(CookieParser());
+app.use(cookieParser());
+
+
+//routes;
+import userRouter from "./routes/user.routes.js"
+app.use("/api/v1//users",userRouter)
 export default app;
