@@ -4,7 +4,7 @@ import fs from "fs"
 cloudinary.config({ 
   cloud_name:process.env.CLOUDINARY_CLOUD_NAME, 
   api_key:process.env.CLOUDINARY_API_KEY, 
-  api_secret:CLOUDINARY_SECRECT_KEY
+  api_secret:process.env.CLOUDINARY_SECRECT_KEY
 });
 //
 async function cloudinary_upload(loacalFilePath) {
@@ -13,11 +13,12 @@ async function cloudinary_upload(loacalFilePath) {
             console.log("cludinary content upload error localfile path not found")
             return null;
         }
-        const result=await cloudinary.v2.uploader.upload(loacalFilePath,{
+        const result=await cloudinary.uploader.upload(loacalFilePath,{
             resourse_type:"auto"
         });
           console.log("content is uploaded on cloudinary successfully");
           console.log(result.url);
+          fs.unlinkSync(loacalFilePath);
           return result;
     }
     catch(err){

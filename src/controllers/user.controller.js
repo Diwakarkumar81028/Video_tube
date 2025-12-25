@@ -8,7 +8,7 @@ import { apiresponse } from "../utils/apiresponse.js";
 const registerUser=asyncHandler(async(req,res)=>{
     //get user detail -> frontend
     const {fullName,email,username,password}=req.body;
-    console.log("email",email);
+    // console.log("email",email);
     //
     // if(fullName===""){
     //     throw new apierror(400,"full name is required");
@@ -20,7 +20,7 @@ const registerUser=asyncHandler(async(req,res)=>{
        throw new apierror(400,"all fields are required");
     }
     //user allready exists
-   const existedUser= User.findOne({
+   const existedUser=await User.findOne({
         $or:[{username},{email}]
     })
     if(existedUser){
@@ -46,7 +46,7 @@ const registerUser=asyncHandler(async(req,res)=>{
     coverImage:coverImage?.url || "",
     email,
     password,
-    username:username.toLowercase()
+    username:username.toLowerCase()
    })
   //user creation
    const createduser=await User.findById(user._id).select(
