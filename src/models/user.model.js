@@ -53,10 +53,10 @@ const userSchema=new Schema({
 )
 //mongoose methods;
 
-//passwod
+//password
 userSchema.pre("save", async function (next){
     if(this.isModified("password")){
-        this.password=bcrypt.hash(this.password,10)
+        this.password=await bcrypt.hash(this.password,10)
     }
     next();
 })
@@ -68,22 +68,22 @@ userSchema.methods.isPasswordCorrect=async function(password){
 //jwt
 //access token
 userSchema.methods.generateAccessToken=function(){
-   jwt.sign(
-    {
+  return jwt.sign(
+    {//payload
         _id:this._id,
         email:this.email,
         username:this.username,
         fullName:this.fullName
     },
-    process.env.ACCESS_TOKEN_SECRET,
+    process.env.ACCESS_TOKEN_SECRET,//secrect key
     {
         expiresIn:process.env.ACCESS_TOKEN_EXPIRY
     }
    )
 }
-//refresh token
+//refresh token--> same as access token
 userSchema.methods.generateRefreshToken=function(){
-       jwt.sign(
+       return jwt.sign(
     {
         _id:this._id,
     },

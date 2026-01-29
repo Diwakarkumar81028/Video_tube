@@ -44,5 +44,4 @@ const videoSchema=new Schema(
 
 //pipelinging in mongoose aggregation
 videoSchema.plugin("mongooseAggregatePaginate")
-
 export const Video=mongoose.model("Video",videoSchema)

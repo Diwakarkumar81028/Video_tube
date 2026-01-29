@@ -1,65 +1,67 @@
-import { asyncHandler } from "../utils/asynchandler.js";
 import { apierror } from "../utils/apierror.js";
-import { User } from "../models/user.model.js";
+import {User} from "../models/user.model.js";
 import {cloudinary_upload} from "../utils/cloudinary.js";
 import { apiresponse } from "../utils/apiresponse.js";
 
+//Register user
+async function  registerUser(req,res) {
+    //1. take data from user--> username,email,fullname...  from user .model.js
+    //2. validation -> not  empty
+    //3. check user allready exits-->using email
+    //4. avatar is required,check for coverimage--> file 
+    //5. upload them to cloudinary
+    //6. create user object-->create entry in db;
+    //7.remove password and refrsh token field from response
+    //8.check user created or not
+    //9. return respone
 
-const registerUser=asyncHandler(async(req,res)=>{
-    //get user detail -> frontend
+    //1.
     const {fullName,email,username,password}=req.body;
-    // console.log("email",email);
-    //
-    // if(fullName===""){
-    //     throw new apierror(400,"full name is required");
-    // }
-    //
-    if(
-        [fullName,email,username,password].some((field)=>field?.trim()==="")
-    ){
-       throw new apierror(400,"all fields are required");
+    //2.
+    if(fullName=="" || email=="" || username=="" || password==""){
+        console.log("Register info is less");
+        throw new apierror(400,"All field is required");
     }
-    //user allready exists
-   const existedUser=await User.findOne({
+    //3.
+    const exiteduser=User.findOne({
         $or:[{username},{email}]
     })
-    if(existedUser){
-        throw new apierror(409,"User  allready exists")
+    if(exiteduser){
+        throw new apierror(409,"User is allready registered")
     }
-    //image
-    const avatarLocalPath = req.files?.avatar[0]?.path
-    const coverImageLocalPath = req.files?.coverImage[0]?.path  
-
-    if(!avatarLocalPath){
-        throw new apierror(400,"avatar is required");
+    //4.multer(midddleware)-->add-->req.files
+    const avatarlocalpath= req.files?.avatar[0]?.path;
+    const coverImagelocalpath=req?.files.coverImage[0]?.path;
+    if(!avatarlocalpath){
+        throw new apierror(400,"Avatar file is required")
     }
-    //
-   const avatar= await cloudinary_upload(avatarLocalPath)
-   const coverImage=await cloudinary_upload(coverImageLocalPath);
+    //5.
+   const avatar= await cloudinary_upload(avatarlocalpath);
+   const coverImage= await cloudinary_upload(coverImagelocalpath);
+   //6.
    if(!avatar){
-    throw new apierror(400,"avatar file is required");
+    throw new apierror(400,"Avatar file is required")
    }
-   //new user creation
-   const user=await User.create({
+   //7.
+   const user= await User.create({
     fullName,
     avatar:avatar.url,
-    coverImage:coverImage?.url || "",
+    coverImage:coverImage?.url||"",
     email,
     password,
-    username:username.toLowerCase()
+    username:username.toLowercase()
    })
-  //user creation
-   const createduser=await User.findById(user._id).select(
+   //8.
+   const createdUser=await User.findById(user._id).select(
     "-password -refreshToken"
    )
-
-   if(!createduser){
-    throw new apierror(500,"user not registered");
+   if(!createdUser){
+    throw new apierror(500,"Something went wrong while registring a user")
    }
-   //res
+   //9.
    return res.status(201).json(
-    new apiresponse(200,createduser,"user registered Successfully")
+    new apiresponse(200,createdUser,"User registred Successfully")
    )
-})
-
+}
 export {registerUser}
+//login user
