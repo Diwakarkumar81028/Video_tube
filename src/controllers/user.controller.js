@@ -14,7 +14,6 @@ async function  registerUser(req,res) {
     //7.remove password and refrsh token field from response
     //8.check user created or not
     //9. return respone
-
     //1.
     const {fullName,email,username,password}=req.body;
     //2.
@@ -23,7 +22,7 @@ async function  registerUser(req,res) {
         throw new apierror(400,"All field is required");
     }
     //3.
-    const exiteduser=User.findOne({
+    const exiteduser=await User.findOne({
         $or:[{username},{email}]
     })
     if(exiteduser){
@@ -31,7 +30,7 @@ async function  registerUser(req,res) {
     }
     //4.multer(midddleware)-->add-->req.files
     const avatarlocalpath= req.files?.avatar[0]?.path;
-    const coverImagelocalpath=req?.files.coverImage[0]?.path;
+    const coverImagelocalpath=req.files?.coverImage[0]?.path;
     if(!avatarlocalpath){
         throw new apierror(400,"Avatar file is required")
     }
@@ -49,7 +48,7 @@ async function  registerUser(req,res) {
     coverImage:coverImage?.url||"",
     email,
     password,
-    username:username.toLowercase()
+    username
    })
    //8.
    const createdUser=await User.findById(user._id).select(

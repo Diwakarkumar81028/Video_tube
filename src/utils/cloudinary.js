@@ -16,8 +16,8 @@ async function cloudinary_upload(loacalFilePath) {
         const result=await cloudinary.uploader.upload(loacalFilePath,{
             resourse_type:"auto"
         });
-          console.log("content is uploaded on cloudinary successfully");
-          console.log(result.url);
+        //   console.log("content is uploaded on cloudinary successfully");
+        //   console.log(result.url);
           fs.unlinkSync(loacalFilePath);
           return result;
     }

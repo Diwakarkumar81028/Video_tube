@@ -15,4 +15,5 @@ router.route("/register").post(
         }
     ]),
     registerUser)//registerUser method call hoga
+
 export default router;
