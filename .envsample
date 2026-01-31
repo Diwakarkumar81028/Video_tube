@@ -1,2 +1,12 @@
-PORT=2000
-MONGODB_URI=mongodb+srv:/
+PORT=8876000
+MONGODB_URI=mongodb+srv://diwakafcgvjhrsingh8109876cg28_db_user:Diwak810286@videotube.f5bd74s.mongodb.net
+CORS_ORIGIN=*
+
+ACCESS_TOKEN_SECRET=cfvgxhcjvhkbbhnjmkopjihgftdrseiuytrWTYuzi988
+ACCESS_TOKEN_EXPIRY=1d
+REFRESH_TOKEN_SECRET=87648DR6OTVv nBHJ JHIGxklbjoihjghTREfjgkhjkjh
+REFRESH_TOKEN_EXPIRY=10d
+
+CLOUDINARY_CLOUD_NAME=dik68eguihkjn8wk
+CLOUDINARY_API_KEY=62453754fhcgjvhkbj3334342
+CLOUDINARY_SECRECT_KEY=vuV2R6RhcgjvhkbjGiGjaXh-KA_j7yKPJ2kY
