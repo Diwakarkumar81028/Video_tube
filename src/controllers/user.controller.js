@@ -175,7 +175,7 @@ async function logoutUser(req, res) {
 }
 export {logoutUser}
 
-//4.
+//4.generate new access and refresh token---> not need to login frequently
 const refreshAccessToken=async function(req,res) {
 try {
         //1. get refrresh token
@@ -217,5 +217,6 @@ catch (error) {
     throw new apierror(401,error?.message||"invalid refreshtoken")
 }
 }
-
 export{refreshAccessToken}
+
+//5.
