@@ -149,7 +149,7 @@ export {loginUser}
 //3. logout
 async function logoutUser(req, res) {
   const userid = req.user._id;
-  console.log(req);
+//   console.log(req);
   await User.findByIdAndUpdate(
     userid,
     {
@@ -220,7 +220,7 @@ catch (error) {
 }
 export{refreshAccessToken}
 
-//5.change passord
+//5.change password
 async function changeUserPassword(req,res) {
     //1. auth 
     //2.old password ko validate
@@ -232,12 +232,12 @@ async function changeUserPassword(req,res) {
         throw new apierror(400,"Incorrect old password");
     }
     //3. change password and save
-    user.password=newPassword
+    user.password=newPassword;
    await user.save({validateBeforeSave:false})
    //4.res
    return res.status(200)
    .json(
-    new apierror(
+    new apiresponse(
         200,
         {},
         "password changed successfully"
@@ -246,7 +246,7 @@ async function changeUserPassword(req,res) {
 }
 export {changeUserPassword}
 
-//6.gwt current user
+//6.get current user
 async function getCurrentUser(req,res) {
     return res.status(200)
     .json(200,req.user,"Current User fetched successfully")
@@ -261,7 +261,7 @@ async function updateAccountDetails(req,res) {
         throw new apierror(400,"All fields are required")
     }
     //
-    const user=User.findByIdAndUpdate(
+    const user=await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set:{
@@ -283,7 +283,7 @@ export {updateAccountDetails}
 async function updateUserAvatar(req,res) {
    const avatarlocalpath= req.file?.path
    if(!avatarlocalpath){
-    new apierror(400,"Avatar file is missing")
+    new apierror(400,"Avatar update file is missing")
    }
    //upload on cloudunary
    const avatar=await cloudinary_upload(avatarlocalpath)
@@ -291,7 +291,7 @@ async function updateUserAvatar(req,res) {
     throw new apierror(400,"Error while updating the avatar")
    }
    //update
-   const user=User.findByIdAndUpdate(
+   const user=await User.findByIdAndUpdate(
      req.user?._id,
      {
         $set:{
@@ -312,9 +312,10 @@ export {updateUserAvatar}
 
 //9 update cover image
 async function updateUserCoverImage(req,res) {
+    //1.multer,2.auth
    const coverImagelocalpath= req.file?.path
    if(!coverImagelocalpath){
-    new apierror(400,"coverImage file is missing")
+    new apierror(400,"coverImage update file is missing")
    }
    //upload on cloudunary
    const coverImage=await cloudinary_upload(coverImagelocalpath)
@@ -322,7 +323,7 @@ async function updateUserCoverImage(req,res) {
     throw new apierror(400,"Error while updating the coverImage")
    }
    //update
-   const user=User.findByIdAndUpdate(
+   const user=await User.findByIdAndUpdate(
      req.user?._id,
      {
         $set:{
