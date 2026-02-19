@@ -22,16 +22,16 @@ router.route("/register").post(
 //2.login
 router.route("/login").post(loginUser) 
 
-//3. loggout
+//3. logout
 router.route("/logout").post(verifyJWT,logoutUser)
 
-//4.generate new accessn and refresh token
+//4.generate new access and refresh token
 router.route("/refresh-token").post(refreshAccessToken)
 
 //5.change user password
 router.route("/change-user-password").post(verifyJWT,changeUserPassword)
 
-//6.ge tcurrent user
+//6.get current user
 router.route("/get-current-user").get(verifyJWT,getCurrentUser);
 
 //7. update account details
@@ -42,5 +42,6 @@ router.route("/update-user-avatar").post(upload.fields([{name:"avatar",maxCount:
 
 //9.coverImage avatar
 router.route("/update-user-coverImage").post(upload.fields([{name:"coverImage",maxCount:1}]),verifyJWT,updateUserCoverImage)
+
 //
 export default router;

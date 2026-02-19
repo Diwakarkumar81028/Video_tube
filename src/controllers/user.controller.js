@@ -4,7 +4,7 @@ import {cloudinary_upload} from "../utils/cloudinary.js";
 import { apiresponse } from "../utils/apiresponse.js";
 import validator from "validator";
 import jwt from "jsonwebtoken";
-import { use } from "react";
+
 
 async function generateAccessAndRefreshToken(userId) {
     try{
@@ -191,6 +191,8 @@ try {
        if(!user) {
         throw new apierror(400,"Invalid refreshToken")
        }
+       console.log(user.refreshToken);
+       console.log(incomingRefreshToken);
        //4.match refrsh token
        if(incomingRefreshToken!==user?.refreshToken){
         throw new apierror(401,"Refresh Token is expired")
@@ -205,7 +207,7 @@ try {
     
        return res.status(200)
        .cookie("accessToken",accessToken,options)
-       .cookie("refreshToken",newrefreshToken.options)
+       .cookie("refreshToken",newrefreshToken,options)
        .json(
           new apiresponse(
             200,
@@ -224,9 +226,10 @@ export{refreshAccessToken}
 async function changeUserPassword(req,res) {
     //1. auth 
     //2.old password ko validate
+    console.log(req.body.oldPassword);
     const {oldPassword,newPassword}=req.body
-    const user=User.findById(req.user._id);
-    const isvaid=await user.isPasswordCorrec(oldPassword)
+    const user=await User.findById(req.user._id);
+    const isvaid=await user.isPasswordCorrect(oldPassword);
     //
     if(!isvaid){
         throw new apierror(400,"Incorrect old password");
@@ -249,7 +252,9 @@ export {changeUserPassword}
 //6.get current user
 async function getCurrentUser(req,res) {
     return res.status(200)
-    .json(200,req.user,"Current User fetched successfully")
+    .json(
+        new apiresponse(200,req.user,"Current User fetched successfully")
+    )
 }
 export {getCurrentUser}
 
@@ -270,7 +275,7 @@ async function updateAccountDetails(req,res) {
             }
         },
         {new:true}
-    ).select("-password")
+    ).select("-password -refreshToken")
     //res
     return res.status(200)
     .json(
@@ -281,7 +286,11 @@ export {updateAccountDetails}
 
 //8. avatar update
 async function updateUserAvatar(req,res) {
-   const avatarlocalpath= req.file?.path
+    //1.auth
+    //2.delete old image from cloudinary
+
+    //3.get avatarlocalpath
+  const avatarlocalpath= req.files?.avatar[0]?.path;
    if(!avatarlocalpath){
     new apierror(400,"Avatar update file is missing")
    }
@@ -313,13 +322,13 @@ export {updateUserAvatar}
 //9 update cover image
 async function updateUserCoverImage(req,res) {
     //1.multer,2.auth
-   const coverImagelocalpath= req.file?.path
+   const coverImagelocalpath= req.files?.coverImage[0]?.path;
    if(!coverImagelocalpath){
     new apierror(400,"coverImage update file is missing")
    }
    //upload on cloudunary
    const coverImage=await cloudinary_upload(coverImagelocalpath)
-   if(!avatar){
+   if(!coverImage){
     throw new apierror(400,"Error while updating the coverImage")
    }
    //update
@@ -340,5 +349,88 @@ async function updateUserCoverImage(req,res) {
     new apiresponse(200,user,"CoverImage is Updated Successfully")
    )
 }
-
 export {updateUserCoverImage}
+
+//10. get user profile->coverImage,avatar,fullname,username,subscriber,subscribed
+async function getUserChannelProfile(req,res) {
+    //1.
+    const {username}=req.params;
+    if(!username?.trim()){
+        throw new apierror(400,"username is missing")
+    }
+    //2.aggregations  pipelines
+    const channel=await User.aggregate(
+        [
+            //1.find user by username in User model
+            {
+                $match:{
+                    username:username?.toLowerCase()
+                }
+            },
+            //2. find subscriber->join subscription schema;
+            {
+                $lookup:{
+                    from:"subscriptions",
+                    localField:"_id",
+                    foreignField:"channel",
+                    as:"subscribers",
+                }
+            },
+            //3.subscribed channels
+            {
+                $lookup:{
+                    from:"subscriptions",
+                    localField:"_id",
+                    foreignField:"subscriber",
+                    as:"subscribedTo",
+                }
+            },
+            //4.addfields-->result
+            {
+                $addFields:{
+                    subscribersCount:{
+                        $size:"$subscribers"
+                    },
+                    channelsSubscribedToCount:{
+                        $size:"$subscribedTo"
+                    },
+                    isSubscribed:{
+                        $cond:{
+                            if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+                            then:true,
+                            else:false
+                        }
+                    }
+                }
+            },
+            //5.project-->project-->send selected things
+            {
+                $project:{
+                   fullName:1,
+                   username:1,
+                   subscribersCount:1,
+                   channelsSubscribedToCount:1,
+                   isSubscribed:1,
+                   avatar:1,
+                   coverImage:1,
+                   email:1,
+                }
+            }
+        ]
+    )
+
+    console.log("channel: ",channel)
+
+    //3.return response
+    if(!channel?.length){
+         throw new apierror(404,"channel does not exists")
+    }
+    //
+    return res.status(200)
+    .json(
+        new apiresponse(200,channel[0],"User channel fetched successfully ")
+    )
+}
+export {getUserChannelProfile}
+
+//11 . get user history seen videoes
