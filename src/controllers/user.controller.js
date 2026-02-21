@@ -433,4 +433,4 @@ async function getUserChannelProfile(req,res) {
 }
 export {getUserChannelProfile}
 
-//11 . get user history seen videoes
+//11 . get user watch history
